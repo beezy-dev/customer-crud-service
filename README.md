@@ -23,7 +23,6 @@ The requirements are the followings:
 - [ ] after the 48-hour window the record should be offloaded to a historical database
 - [ ] concurrent writing to database and in-memory caching using sqlite to leverage gorm
 
-
 ## service sequence
 
 1. starting service
@@ -39,6 +38,21 @@ The requirements are the followings:
 Clone the repository: 
 ```
 git clone https://github.com/beezy-dev/traveler-crud-service.git 
+```
+
+Get either postgres or mariadb running with Podman (or docker):
+
+for postgres
+```
+podman run --detach --name postgres -e POSTGRES_USER=user -e POSTGRES_PASSWORD=password -p 5432:5432
+```
+for mariadb
+```
+podman run --detach --name mariadb -e MYSQL_ROOT_PASSWORD=user -e MYSQL_USER=password -p 3306:3306 -p 8082:8080 mariadb
+```
+NOTE: as-is, the data is not persistent! Use a volume to achieve data persistency like:
+```
+podman run --detach --name postgres -e POSTGRES_USER=user -e POSTGRES_PASSWORD=password -p 5432:5432 -v postgres:/var/lib/data postgres
 ```
 
 Run CompileDaemon to catch any code changes to trigger a rebuild and start of your binary:

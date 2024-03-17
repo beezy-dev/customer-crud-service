@@ -70,6 +70,9 @@ func DataBackEnd() {
 			log.Fatal(err)
 		} else {
 			log.Println("Info: connected to database", dbName, "in service", dbType)
+			// updating backend schema for the given database - TODO verify the impact if structure change
+			log.Println("Info: updating schema of database", dbName, "in service", dbType)
+			MigrateSchema()
 		}
 	case "mariadb":
 		log.Println("Info: database backend service configured with:", dbType)

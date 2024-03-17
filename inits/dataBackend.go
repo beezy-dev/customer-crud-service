@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 
 	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -13,7 +15,6 @@ import (
 var DB *gorm.DB
 
 func DataBackEnd() {
-
 	// loading variables from .env file
 	LoadEnv()
 
@@ -26,8 +27,9 @@ func DataBackEnd() {
 	dbPass := os.Getenv("DB_PASS")
 	dbName := os.Getenv("DB_NAME")
 
-	// exiting on non defined backend
-	if dbType != "postgres" && dbType != "mariadb" {
+	// supported backend
+	backends := []string{"postgres", "mariadb", "sqlite"}
+	if !slices.Contains(backends, dbType) {
 		log.Fatal("Fatal: ", dbType, " is not support. Refer to documentation for supported databackend")
 	}
 
@@ -41,22 +43,24 @@ func DataBackEnd() {
 		})
 		if err != nil {
 			log.Println("Error: can not connect to", dbType, "service.")
-			log.Fatal(err)
+			log.Fatal("Fatal: ", err)
 		} else {
 			log.Println("Info: connected to", dbType, "service.")
 		}
 		CreateDBPostgres()
 	case "mariadb":
 		log.Println("Info: database backend service configured with:", dbType)
-		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
-		log.Printf(dsn)
+		// dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
+		// DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+		// 	Logger: logger.Default.LogMode(logger.Silent),
+		// })
 		log.Fatal("Fatal: database backend service configured with: ", dbType, " not yet implemented")
 	}
 
 	// dsn connection based on backend type to connect to db
 	switch dbType {
 	case "postgres":
-		log.Println("Info: reconnecting to service", dbType, " and opening", dbName)
+		log.Println("Info: reconnecting to service", dbType, "and opening", dbName)
 		dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s", dbHost, dbPort, dbUser, dbPass, dbName)
 		DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Silent),
@@ -68,7 +72,17 @@ func DataBackEnd() {
 			log.Println("Info: connected to database", dbName, "in service", dbType)
 		}
 	case "mariadb":
-		log.Println("Info: reconnecting to service", dbType, " and opening", dbName)
+		log.Println("Info: database backend service configured with:", dbType)
+		// dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
+		// DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+		// 	Logger: logger.Default.LogMode(logger.Silent),
+		// })
+		log.Fatal("Fatal: database backend service configured with: ", dbType, " not yet implemented")
+	case "sqlite":
+		log.Println("Info: database backend service configured with:", dbType)
+		DB, err = gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		})
 		log.Fatal("Fatal: database backend service configured with: ", dbType, " not yet implemented")
 	}
 

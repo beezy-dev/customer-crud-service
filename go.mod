@@ -1,4 +1,4 @@
-module github.com/beezy-dev/customer-crud-service
+module github.com/beezy-dev/traveler-crud-service
 
 go 1.22.1
 

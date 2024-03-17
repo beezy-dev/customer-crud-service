@@ -4,13 +4,13 @@ import (
 	"log"
 	"os"
 
-	"github.com/beezy-dev/customer-crud-service/inits"
+	"github.com/beezy-dev/traveler-crud-service/inits"
 	"github.com/gin-gonic/gin"
 )
 
 func init() {
 	inits.LoadEnv()
-	inits.ConnectDB()
+	inits.DataBackEnd()
 }
 
 func main() {

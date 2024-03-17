@@ -12,41 +12,45 @@ import (
 
 var DB *gorm.DB
 
-func ConnectDB() {
+func DataBackEnd() {
 
 	// loading variables from .env file
 	LoadEnv()
 
+	// defining useful vars
+	var err error
+	dbType := os.Getenv("DB_TYPE")
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
 	dbUser := os.Getenv("DB_USER")
 	dbPass := os.Getenv("DB_PASS")
-	dbName := os.Getenv("DB_NAME")
 
-	// connecting to database
-	var err error
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s", dbHost, dbPort, dbUser, dbPass, dbName)
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Silent),
-	})
-
-	// handling connection error
-	if err != nil {
-		log.Println("Error: failed to connect to database.")
-		log.Println("Creating database")
-
-		stmt := fmt.Sprintf("SELECT * FROM pg_database WHERE datname = '%s';", dbName)
-		rs := DB.Raw(stmt)
-		if rs.Error != nil {
-			log.Println("Database ", dbName, " exists.")
-		} else {
-			stmt := fmt.Sprintf("CREATE DATABASE '%s';", dbName)
-			rs := DB.Exec(stmt)
-			if rs.Error != nil {
-				log.Println("Error: failed to create database:", dbName)
-			}
-		}
-	} else {
-		log.Println("Database", dbName, "exists.")
+	// exiting on non defined backend
+	if dbType != "postgres" && dbType != "mariadb" {
+		log.Fatal("Error: ", dbType, " is not support. Refer to documentation for supported databackend")
 	}
+
+	// dsn connection based on backend type to initiate backend
+	switch dbType {
+	case "postgres":
+		log.Println("Info: database backend service configured with:", dbType)
+		dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s", dbHost, dbPort, dbUser, dbPass)
+		DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		})
+		if err != nil {
+			log.Println("Error: can not connect to", dbType, "service.")
+			log.Fatal(err)
+		} else {
+			log.Println("Info: connected to", dbType, "service.")
+		}
+		CreateDBPostgres()
+	case "mariadb":
+		log.Println("Info: database backend service configured with:", dbType)
+		log.Fatal("Fatal: database backend service configured with: ", dbType, " not yet implemented")
+	}
+
+	//
+	// CreateDBPostgres()
+
 }

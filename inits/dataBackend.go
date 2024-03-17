@@ -48,6 +48,8 @@ func DataBackEnd() {
 		CreateDBPostgres()
 	case "mariadb":
 		log.Println("Info: database backend service configured with:", dbType)
+		dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", dbUser, dbPass, dbHost, dbPort, dbName)
+		log.Printf(dsn)
 		log.Fatal("Fatal: database backend service configured with: ", dbType, " not yet implemented")
 	}
 
